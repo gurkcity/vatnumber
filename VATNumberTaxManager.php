@@ -25,6 +25,8 @@
 */
 
 use Onlineshopmodule\PrestaShop\Module\Vatnumber\B2BIdentifier;
+use Onlineshopmodule\PrestaShop\Module\Vatnumber\B2BIdentifierException;
+use Onlineshopmodule\PrestaShop\Module\Vatnumber\B2BIdentifierFactory;
 
 class VATNumberTaxManager implements TaxManagerInterface
 {
@@ -52,6 +54,10 @@ class VATNumberTaxManager implements TaxManagerInterface
 
 		static $cached_address = NULL;
 
+		if (!Validate::isLoadedObject($address)) {
+			return false;
+		}
+
 		if (!Configuration::get('VATNUMBER_MANAGEMENT')) {
 			return false;
 		}
@@ -60,11 +66,14 @@ class VATNumberTaxManager implements TaxManagerInterface
 			$cached_address = $address;
 		}
 
-		$b2b_identifier = new B2BIdentifier(
-			$cached_address,
-			Configuration::get('VATNUMBER_ZONE_1'),
-			Configuration::get('VATNUMBER_ZONE_2'),
-		);
+		try {
+			$b2b_identifier = (new B2BIdentifierFactory(
+				(int)Configuration::get('VATNUMBER_ZONE_1'),
+				(int)Configuration::get('VATNUMBER_ZONE_2')
+			))->getB2BIdentifierForAddress($cached_address);
+		} catch (B2BIdentifierException $e) {
+			return false;
+		}
 
 		return $b2b_identifier->getB2BType() === B2BIdentifier::TYPE_TAX_EXCL;
 	}
