@@ -24,13 +24,15 @@
 *  International Registered Trademark & Property of PrestaShop SA
 */
 
+use Onlineshopmodule\PrestaShop\Module\Vatnumber\B2BIdentifier;
+
 class VATNumberTaxManager implements TaxManagerInterface
 {
 	public static function isAvailableForThisAddress(Address $address)
 	{
 		/*
 		HOTFIX
-		
+
 		For some reason, this check is called 6 times (?)
 
 		1 w. the real address
@@ -50,16 +52,21 @@ class VATNumberTaxManager implements TaxManagerInterface
 
 		static $cached_address = NULL;
 
+		if (!Configuration::get('VATNUMBER_MANAGEMENT')) {
+			return false;
+		}
+
 		if ($address->id_customer != NULL) {
 			$cached_address = $address;
 		}
 
-		// Now, check on the cached address object
-		return (!empty($cached_address->vat_number)
-		    && !empty($cached_address->id_country)
-		    && $cached_address->id_country != Configuration::get('VATNUMBER_COUNTRY')
-		    && Configuration::get('VATNUMBER_MANAGEMENT')
+		$b2b_identifier = new B2BIdentifier(
+			$cached_address,
+			Configuration::get('VATNUMBER_ZONE_1'),
+			Configuration::get('VATNUMBER_ZONE_2'),
 		);
+
+		return $b2b_identifier->getB2BType() === B2BIdentifier::TYPE_TAX_EXCL;
 	}
 
 	public function getTaxCalculator()

@@ -40,12 +40,8 @@ class VatNumber extends TaxManagerModule
 		$this->tax_manager_class = 'VATNumberTaxManager';
 
 		$this->bootstrap = true;
-		parent::__construct();
-		$id_country = (int)Configuration::get('VATNUMBER_COUNTRY');
 
-		if ($id_country == 0) {
-			$this->warning = $this->l('No default country set.');
-		}
+		parent::__construct();
 
 		$this->displayName = $this->l('European VAT number');
 		$this->description = $this->l('Enables you to enter the intra-community VAT number when creating the address. You must fill in the company field to allow entering the VAT number.');
@@ -192,8 +188,11 @@ class VatNumber extends TaxManagerModule
 
 		if (Tools::isSubmit('submitVatNumber'))
 		{
-			if (Configuration::updateValue('VATNUMBER_COUNTRY', (int)Tools::getValue('VATNUMBER_COUNTRY')))
-				$echo .= $this->displayConfirmation($this->l('Your country has been updated.'));
+			if (Configuration::updateValue('VATNUMBER_ZONE_1', (int)Tools::getValue('VATNUMBER_ZONE_1')))
+				$echo .= $this->displayConfirmation($this->l('The zone for your home country has been updated.'));
+
+			if (Configuration::updateValue('VATNUMBER_ZONE_2', (int)Tools::getValue('VATNUMBER_ZONE_2')))
+				$echo .= $this->displayConfirmation($this->l('The zone for your EU countries has been updated.'));
 
 			if (Configuration::updateValue('VATNUMBER_CHECKING', (int)Tools::getValue('VATNUMBER_CHECKING')))
 				$echo .= ((bool)Tools::getValue('VATNUMBER_CHECKING') ? $this->displayConfirmation($this->l('The check of the VAT number with the WebService is now enabled.')) : $this->displayConfirmation($this->l('The check of the VAT number with the WebService is now disabled.')));
@@ -205,19 +204,19 @@ class VatNumber extends TaxManagerModule
 
 	public function renderForm()
 	{
-		$countries = Country::getCountries($this->context->language->id);
+		$zones = Zone::getZones($this->context->language->id);
 
-		$countries_fmt = array(
+		$zones_fmt = array(
 			0 => array(
 				'id' => 0,
-				'name' => $this->l('-- Choose a country --')
+				'name' => $this->l('-- Choose a zone --')
 			)
 		);
 
-		foreach ($countries as $country)
-			$countries_fmt[] = array(
-				'id' => $country['id_country'],
-				'name' => $country['name']
+		foreach ($zones as $zone)
+			$zones_fmt[] = array(
+				'id' => $zone['id_zone'],
+				'name' => $zone['name']
 			);
 
 		$fields_form = array(
@@ -229,13 +228,26 @@ class VatNumber extends TaxManagerModule
 				'input' => array(
 					array(
 						'type' => 'select',
-						'label' => $this->l('Customers\' country'),
-						'desc' => $this->l('Filter customers\' country.'),
-						'name' => 'VATNUMBER_COUNTRY',
-						'required' => false,
-						'default_value' => (int)$this->context->country->id,
+						'label' => $this->l('Zone home country'),
+						'desc' => $this->l('Select a zone here that corresponds to your home country'),
+						'name' => 'VATNUMBER_ZONE_1',
+						'required' => true,
+						'default_value' => (int)$this->context->country->id_zone,
 						'options' => array(
-							'query' => $countries_fmt,
+							'query' => $zones_fmt,
+							'id' => 'id',
+							'name' => 'name',
+						)
+					),
+					array(
+						'type' => 'select',
+						'label' => $this->l('Zone home country'),
+						'desc' => $this->l('Select a zone here that corresponds to the countries of the EU'),
+						'name' => 'VATNUMBER_ZONE_2',
+						'required' => true,
+						'default_value' => (int)$this->context->country->id_zone,
+						'options' => array(
+							'query' => $zones_fmt,
 							'id' => 'id',
 							'name' => 'name',
 						)
@@ -291,7 +303,8 @@ class VatNumber extends TaxManagerModule
 	public function getConfigFieldsValues()
 	{
 		return array(
-			'VATNUMBER_COUNTRY' => Tools::getValue('VATNUMBER_COUNTRY', Configuration::get('VATNUMBER_COUNTRY')),
+			'VATNUMBER_ZONE_1' => Tools::getValue('VATNUMBER_ZONE_1', Configuration::get('VATNUMBER_ZONE_1')),
+			'VATNUMBER_ZONE_2' => Tools::getValue('VATNUMBER_ZONE_2', Configuration::get('VATNUMBER_ZONE_2')),
 			'VATNUMBER_CHECKING' => Tools::getValue('VATNUMBER_CHECKING', Configuration::get('VATNUMBER_CHECKING')),
 		);
 	}
