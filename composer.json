@@ -1,12 +1,12 @@
 {
   "name": "prestashop/vatnumber",
   "description": "PrestaShop module vatnumber",
-  "homepage": "https://github.com/PrestaShop/vatnumber",
+  "homepage": "https://www.onlineshop-module.de",
   "license": "AFL-3.0",
   "authors": [
     {
-      "name": "PrestaShop SA",
-      "email": "contact@prestashop.com"
+        "name": "Markus Engel",
+        "email": "info@onlineshop-module.de"
     }
   ],
   "require": {
