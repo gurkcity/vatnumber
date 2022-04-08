@@ -43,8 +43,9 @@ class VatNumber extends TaxManagerModule
 		parent::__construct();
 		$id_country = (int)Configuration::get('VATNUMBER_COUNTRY');
 
-		if ($id_country == 0)
+		if ($id_country == 0) {
 			$this->warning = $this->l('No default country set.');
+		}
 
 		$this->displayName = $this->l('European VAT number');
 		$this->description = $this->l('Enables you to enter the intra-community VAT number when creating the address. You must fill in the company field to allow entering the VAT number.');

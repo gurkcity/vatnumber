@@ -12,8 +12,18 @@
   "require": {
     "php": ">=5.3.2"
   },
+  "autoload": {
+    "psr-4": {
+        "Onlineshopmodule\\PrestaShop\\Module\\Vatnumber\\": "src/"
+    },
+    "classmap": [
+        "vatnumber.php"
+    ],
+    "exclude-from-classmap": []
+  },
   "config": {
-    "preferred-install": "dist"
+      "preferred-install": "dist",
+      "prepend-autoloader": false
   },
   "type": "prestashop-module"
 }
